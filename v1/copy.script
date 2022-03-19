@@ -1,0 +1,12 @@
+import { init } from "loop.script";
+
+var files = args;
+var loop = init();
+var serverPrefix = "pserv-";
+
+loop("home", function (node) {
+	if (node.indexOf(serverPrefix) >= 0) return false;
+	print("copy file to " + node);
+	scp(files, "home", node);
+	return true;
+});

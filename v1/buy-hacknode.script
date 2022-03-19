@@ -1,0 +1,70 @@
+var maxNumNodes = 32;
+
+// Continuously try to purchase servers until we've reached the maximum
+// amount of servers
+var needUpgrade = true;
+
+while (hacknet.numNodes() < maxNumNodes) {
+    // Check if we have enough money to purchase a server
+    // If we have enough money, then:
+    //  1. Purchase the server
+    //  2. upgrade every node to match node-0 or upgrade node-0
+    if (getServerMoneyAvailable("home") > hacknet.getPurchaseNodeCost()) {
+        print("Add new node");
+        hacknet.purchaseNode();
+    } else {
+        var n0 = hacknet.getNodeStats(0);
+        print(n0.name + " " + n0.level + " " + n0.ram + " " + n0.cores);
+
+        if (needUpgrade) {
+            for (var i = 1; i < hacknet.numNodes(); i++) {
+                var nx = hacknet.getNodeStats(i);
+                print(nx.name + " " + nx.level + " " + nx.ram + " " + nx.cores);
+
+                if (nx.level < n0.level) {
+                    print("upgrade " + nx.name + " level diff " + (n0.level - nx.level));
+                    while (true != hacknet.upgradeLevel(i, n0.level - nx.level)) {
+                        sleep(3000);
+                    }
+                }
+                if (nx.ram < n0.ram) {
+                    print("upgrade " + nx.name + " ram diff " + (n0.ram - nx.ram));
+                    while (true != hacknet.upgradeRam(i, n0.ram - nx.ram)) {
+                        sleep(3000);
+                    }
+                }
+                if (nx.cores < n0.cores) {
+                    print("upgrade " + nx.name + " core diff " + (n0.core - nx.core));
+                    while (true != hacknet.upgradeCore(i, n0.cores - nx.cores)) {
+                        sleep(3000);
+                    }
+                }
+            }
+            needUpgrade = false;
+        } else {
+            // upgrade n0
+            var levelCost = hacknet.getLevelUpgradeCost(0, 1);
+            if (levelCost > 0 && levelCost < getServerMoneyAvailable("home")) {
+                hacknet.upgradeLevel(0, 10);
+                print("upgrade node 0 level");
+                needUpgrade = true;
+                continue;
+            }
+            var ramCost = hacknet.getRamUpgradeCost(0, 1);
+            if (ramCost > 0 && ramCost < getServerMoneyAvailable("home")) {
+                hacknet.upgradeRam(0, 1);
+                print("upgrade node 0 ram");
+                needUpgrade = true;
+
+                continue;
+            }
+            var coreCost = hacknet.getCoreUpgradeCost(0, 1);
+            if (coreCost > 0 && coreCost < getServerMoneyAvailable("home")) {
+                hacknet.upgradeCore(0, 1);
+                print("upgrade node 0 core");
+                needUpgrade = true;
+            }
+        }
+
+    }
+}

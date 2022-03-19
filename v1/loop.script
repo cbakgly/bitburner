@@ -1,0 +1,26 @@
+// run at home node
+
+function init() {
+    var visited = {};
+
+    return function (node, fn) {
+        visited[node] = true;
+
+        var nextNodes = scan(node);
+        // print(nextNodes);
+
+        while (nextNodes.length > 0) {
+            var nextNode = nextNodes.shift();
+
+            if (visited[nextNode] == true || !serverExists(nextNode)) {
+                // print("pass " + nextNode);
+                continue;
+            }
+
+            // print("visiting " + nextNode);
+            if (fn(nextNode)){
+                loop(nextNode, fn);
+            }
+        }
+    }
+};

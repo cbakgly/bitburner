@@ -1,0 +1,32 @@
+import { init } from "loop.script";
+
+var loop = init();
+var startNode = "home";
+var serverPrefix = "pserv-";
+var hackScript = "hack.script";
+
+var target = args[0];
+var killscript = args[1];
+
+if (killscript == undefined) killscript = true;
+
+if (target != undefined)
+
+    loop(startNode, function (node) {
+        if (node.indexOf(serverPrefix) < 0) return false;
+
+        if (hasRootAccess(node)) {
+            if (killscript) {
+                while(scriptRunning(hackScript, node)) {
+                    scriptKill(hackScript,node);
+                    sleep(3000);
+                }
+            }
+
+            var numThreads = Math.floor(getServerMaxRam(node) / getScriptRam(hackScript));
+            if (numThreads > 0)
+                exec(hackScript, node, numThreads, target);
+        }
+
+        return true;
+    });

@@ -1,0 +1,54 @@
+import { init } from "loop.script";
+
+var loop = init();
+var startNode = "home";
+var serverPrefix = "pserv-";
+var hackScript = "hack.script";
+
+function root(target) {
+    if (hasRootAccess(target)) return true;
+
+    // check precondition
+
+    if (fileExists("BruteSSH.exe", "home")) {
+        brutessh(target);
+    }
+
+    if (fileExists("FtpCrack.exe", "home")) {
+        ftpcrack(target);
+    }
+
+    if (fileExists("relaySMTP.exe", "home")) {
+        relaysmtp(target);
+    }
+
+    if (fileExists("httpworm.exe", "home")) {
+        httpworm(target);
+    }
+
+    if (fileExists("sqlinject.exe", "home")) {
+        sqlinject(target);
+    }
+    // Get root access to target server
+    try {
+        nuke(target);
+    } finally { }
+
+    // installBackdoor(target);
+
+    return hasRootAccess(target);
+}
+
+loop(startNode, function (node) {
+    if (node.indexOf(serverPrefix) >= 0) return false;
+
+    // if (root(node) && !scriptRunning(hackScript, node)) {
+    //     var numThreads = Math.floor(getServerMaxRam(node) / getScriptRam(hackScript));
+    //     if (numThreads > 0)
+    //         exec(hackScript, node, numThreads, node);
+    // }
+    print("rooting " + node);
+    root(node);
+
+    return true;
+});
