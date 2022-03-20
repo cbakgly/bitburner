@@ -57,13 +57,15 @@ export async function main(ns) {
         if (nextTarget === null) {
             ns.toast("Monitoer: no available target");
             await ns.sleep(param.delay);
+
+            hacked.clear();
             continue;
         } 
 
         ns.tprint(nextTarget);
 
         if (host == 'home') {
-            ns.run("runhack-on-home.js", 1, '--target', nextTarget.hostname);
+            ns.run("runhack-on-home.js", 1, '--target', nextTarget.hostname, '--reserve-mem', 32);
         } else if (host.indexOf(ServerPrefix) >=0) {
             ns.run('runhack-on-pserver.js', 1, '--target', nextTarget.hostname, '--host', host);
         } else {

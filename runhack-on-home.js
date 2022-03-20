@@ -5,7 +5,8 @@ const reservedMem = 8; // 8g
 **/
 export async function main(ns) {
     const Options = [
-        ['target', '']
+        ['target', ''],
+        ['reserve-mem', reservedMem]
     ]
     const param = ns.flags(Options);
 

@@ -33,7 +33,7 @@ export function main(ns) {
 
     ns.tprint("First 3 nodes without mem");
     for (let i = 0, j = 0; i < result.length && j < 3; i++) {
-        if (result[i].mem == 0) {
+        if (result[i].maxRam == 0) {
             ns.tprint(result[i]);
             j++;
         }
