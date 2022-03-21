@@ -3,9 +3,9 @@
 **/
 export async function main(ns) {
     const Options = [
-        ['target', ns.getHostname()],
+        ['target', ''],
         ['thread', 1],
-        ['affectstock', false],
+        ['affectstock', true],
         ['delay', 3000],
         ['help', false]
     ];
@@ -17,7 +17,11 @@ export async function main(ns) {
         return;
     }
 
+    if (param.target == '') {
+        param.target = ns.getHostname();
+    }
     param.host = ns.getHostname();
+
 
     ns.tprint(param);
 
@@ -48,14 +52,10 @@ export async function main(ns) {
         }
     }
 
-    let report = {
-        'script': 'hack.js',
-        'param': param,
-        'totalMoney': total
-    }
+    param.totalMoney = total;
 
     let port = ns.getPortHandle(1);
-    while(!port.tryWrite(report)) {
+    while(!port.tryWrite(param)) {
         await ns.sleep(param.delay);
     }
 }

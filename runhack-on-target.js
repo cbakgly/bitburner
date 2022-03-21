@@ -2,7 +2,13 @@ import { getNodes } from "nodes.js";
 
 const ServerPrefix = "pserv-";
 const HackScript = "hack.js";
-const Options = [["killscript", false], ["delay", 3000], ['host', []], ['target', '']];
+const Options = [
+    ["killscript", false], 
+    ["delay", 3000], 
+    ['host', []], 
+    ['target', ''],
+    ['affectstock', false],
+];
 /**
 * @param {NS} ns
 **/
@@ -27,8 +33,8 @@ export async function main(ns) {
 
         let numThreads = Math.floor(ns.getServerMaxRam(node) / ns.getScriptRam(HackScript));
         if (numThreads > 0) {
-            if (param.target == '') {
-                ns.exec(HackScript, node, numThreads, '--thread', numThreads);
+            if (param.affectstock) {
+                ns.exec(HackScript, node, numThreads, '--thread', numThreads, '--target', param.target, '--affectstock');
             } else {
                 ns.exec(HackScript, node, numThreads, '--thread', numThreads, '--target', param.target);
             }

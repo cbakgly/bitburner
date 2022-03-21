@@ -33,40 +33,42 @@ export async function main(ns) {
 
     if (param.clearmsg) {
         // port.clear();
-        while(!port.empty()) ns.tprint(port.read());
+        while (!port.empty()) ns.tprint(port.read());
     }
 
     const hacked = new Set();
 
-    while(true) {
+    while (true) {
         while (port.empty()) {
             await ns.sleep(param.delay);
         }
         let report = port.read();
 
-        let host = report.param.host;
+        let host = report.host;
         let money = report.totalMoney;
-        let target = report.param.target;
+        let target = report.target;
 
-        ns.tprint("Total money " + money);
-        ns.tprint("Host " + host);
-        ns.tprint("Target " + target);
+        ns.print("");
+        ns.print("Total money " + money);
+        ns.print("Host " + host);
+        ns.print("Target " + target);
+
 
         hacked.add(target);
         let nextTarget = getNextTarget(ns, hacked);
         if (nextTarget === null) {
-            ns.toast("Monitoer: no available target");
+            ns.toast("Monitor: no available target");
             await ns.sleep(param.delay);
 
             hacked.clear();
             continue;
-        } 
-
-        ns.tprint(nextTarget);
+        }
+        ns.print("Next " + nextTarget.hostname);
+        ns.print(nextTarget);
 
         if (host == 'home') {
             ns.run("runhack-on-home.js", 1, '--target', nextTarget.hostname, '--reserve-mem', 32);
-        } else if (host.indexOf(ServerPrefix) >=0) {
+        } else if (host.indexOf(ServerPrefix) >= 0) {
             ns.run('runhack-on-pserver.js', 1, '--target', nextTarget.hostname, '--host', host);
         } else {
             ns.run('runhack-on-target.js', 1, '--target', nextTarget.hostname, '--host', host);
