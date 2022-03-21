@@ -17,6 +17,7 @@ export async function main(ns) {
     //ns.run("buy-hacknode.js");
     ns.run("buy-server.js", 1, '--target', 'foodnstuff');
     ns.run("runhack-on-home.js", 1, '--target', 'joesguns');
+    ns.run("runhack-on-pserver.js", 1, '--target', 'joesguns');
 
     ns.toast("Done bootstrap");
 }

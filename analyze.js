@@ -18,41 +18,67 @@ export function main(ns) {
 
     if (param.target !== '') {
         ns.tprint(ns.getServer(param.target));
-        ns.tprint("1 thread money hack" + ns.hackAnalyze(param.target));
-        ns.tprint("hack chance " + ns.hackAnalyzeChance(param.target));
-        ns.tprint("increasing sec " + ns.hackAnalyzeSecurity(param.target));
-        ns.tprint("threads for 0.75 money " + ns.hackAnalyzeThreads(param.target, 0.75 * ns.getServerMaxMoney(param.target)));
         return;
     }
 
-    let result = getTargets(ns);
-
-    ns.tprint("First 3 nodes with max money");
-    for (let i = 0; i < 3; i++)
-        ns.tprint(result[i]);
-
-    ns.tprint("First 3 nodes without mem");
-    for (let i = 0, j = 0; i < result.length && j < 3; i++) {
-        if (result[i].maxRam == 0) {
-            ns.tprint(result[i]);
-            j++;
-        }
+    for (let i of getAllTargetInfo(ns)) {
+        ns.tprint(i);
     }
+}
+
+export function getAllTargetInfo(ns) {
+    let nodes = [];
+    for (let node of getNodes(ns)) {
+        let info = ns.getServer(node);
+
+        if (info.purchasedByPlayer) continue;
+
+        nodes.push(info);
+    }
+
+    nodes.sort((a, b) => a.moneyMax - b.moneyMax);
+
+    let player = ns.getPlayer();
+    let results = [];
+    for (let info of nodes) {
+        let result = {
+            'hostname': info.hostname,
+            'mMax': ns.nFormat(info.moneyMax, '0.00a'),
+            'mNow': ns.nFormat(info.moneyAvailable, '0.00a'),
+            'growth': info.serverGrowth,
+            'hard': ns.nFormat(info.hackDifficulty, '0.0a'),
+            'reqlvl': info.requiredHackingSkill,
+            'admin': info.hasAdminRights
+        };
+
+        if (ns.fileExists("formulas.exe", "home")) {
+            result["grow%"] = ns.nFormat(ns.formulas.hacking.growPercent(info, 1, player, 1), '0.00a');
+            result['growTime'] = ns.tFormat(ns.formulas.hacking.growTime(info, player));
+            result['hackChance'] = ns.nFormat(ns.formulas.hacking.hackChance(info, player), '0.00a');
+            result['hackExp'] = ns.nFormat(ns.formulas.hacking.hackExp(info, player), '0.00a');
+            result['hack%'] = ns.nFormat(ns.formulas.hacking.hackPercent(info, player), '0.00a');
+            result['hackTime'] = ns.tFormat(ns.formulas.hacking.hackTime(info, player));
+            result['weakTime'] = ns.tFormat(ns.formulas.hacking.weakenTime(info, player));
+        }
+
+        results.push(result);
+    }
+    return results;
 }
 
 export function getTargets(ns) {
     let result = [];
-    for (let node of getNodes(ns)) {
-        if (node === 'home') continue;
+    let level = ns.getHackingLevel();
+    for (let info of getAllTargetInfo(ns)) {
 
-        let info = ns.getServer(node);
-
-        if (!info.hasAdminRights || info.moneyMax == 0 || info.purchasedByPlayer || info.requiredHackingSkill > ns.getHackingLevel()) continue;
+        if (!info.admin 
+            || info.mMax == 0 
+            || info.reqlvl > level) continue;
 
         result.push(info);
     }
 
-    result.sort((a, b) => a.hackDifficulty - b.hackDifficulty);
+    result.sort((a, b) => a.hard - b.hard);
     return result;
 }
 

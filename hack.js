@@ -23,7 +23,7 @@ export async function main(ns) {
     param.host = ns.getHostname();
 
 
-    ns.tprint(param);
+    ns.print(param);
 
     while (ns.getServerRequiredHackingLevel(param.target) > ns.getHackingLevel()) {
         await ns.sleep(param.delay);
