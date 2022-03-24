@@ -6,22 +6,17 @@ import { getRoutes } from "nodes.js";
 export function main(ns) {
 
     const Options = [
-        ['help', false],
-        ['routeto', ''],
-        ['allnodes', true],
+        ['to', ''],
         ['search', '']
     ];
     const param = ns.flags(Options);
 
-    if (param.help) {
-        ns.tprint(Options);
-        return;
-    }
+    ns.tprint(param);
 
     let nodes = getRoutes(ns);
 
-    if (param.routeto != '') {
-        let c = param.routeto;
+    if (param.to != '') {
+        let c = param.to;
         while (c != null) {
             let p = nodes.get(c);
 
@@ -39,9 +34,7 @@ export function main(ns) {
         return;
     }
 
-    if (param.allnodes) {
-        for (let node of nodes.keys()) {
-            ns.tprint(node);
-        }
+    for (let node of nodes.keys()) {
+        ns.tprint(node);
     }
 }

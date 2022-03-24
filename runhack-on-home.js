@@ -1,4 +1,4 @@
-const HackScript = "hack.js";
+const HackScript = "hack-weaken-grow.js";
 const reservedMem = 8; // 8g
 /**
 * @param {NS} ns

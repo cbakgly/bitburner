@@ -1,6 +1,3 @@
-//https://bitburner.readthedocs.io/en/latest/advancedgameplay/hackingalgorithms.html
-//https://github.com/danielyxie/bitburner/blob/dev/markdown/bitburner.ns.md
-
 /** @param {NS} ns **/
 export async function main(ns) {
     const Options = [
@@ -14,12 +11,11 @@ export async function main(ns) {
     const param = ns.flags(Options);
 
     if (param.help || param.target == '') {
-        ns.tprint(param);
+        ns.tprint(Options);
         return;
     }
 
-    while(param.loop) {
-        await ns.hack(param.target, {threads: param.thread, stock: param.affectstock});
+    while (param.loop) {
+        await ns.grow(param.target, { threads: param.thread, stock: param.affectstock });
     }
-    
-}   
+}

@@ -1,7 +1,7 @@
 import { getNodes } from "nodes.js";
 
 const ServerPrefix = "pserv-";
-const HackScript = "hack.js";
+const HackScript = "hack-weaken-grow.js";
 const Options = [
     ["killscript", false], 
     ["delay", 3000], 
@@ -22,7 +22,7 @@ export async function main(ns) {
     }
 
     for (let node of nodes) {
-        if (node.indexOf(ServerPrefix) >= 0 || node === "home") continue;
+        if (node.indexOf(ServerPrefix) >= 0) continue;
 
         if (param.killscript) {
             while (ns.scriptRunning(HackScript, node)) {
@@ -33,6 +33,7 @@ export async function main(ns) {
 
         let numThreads = Math.floor(ns.getServerMaxRam(node) / ns.getScriptRam(HackScript));
         if (numThreads > 0) {
+            await ns.scp(HackScript, "home", node);
             if (param.affectstock) {
                 ns.exec(HackScript, node, numThreads, '--thread', numThreads, '--target', param.target, '--affectstock');
             } else {

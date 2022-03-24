@@ -6,8 +6,10 @@ export function getNodes(ns) {
 
     loop("home", null, visited, ns);
 
+    visited.delete('home');
+
     return visited.keys();
-};
+}
 
 /*** @param {NS} ns**/
 export function getRoutes(ns) {

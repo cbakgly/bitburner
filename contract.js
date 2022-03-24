@@ -8,7 +8,7 @@ export async function main(ns) {
     const param = ns.flags(Options);
 
 
-    ns.share();
+    // await ns.share();
 
     ns.tprint(ns.getServer(param.target));
     ns.tprint(ns.hackAnalyze(param.target));

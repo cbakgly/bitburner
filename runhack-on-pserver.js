@@ -1,11 +1,11 @@
 import { getNodes } from "nodes.js";
 
 const ServerPrefix = "pserv-";
-const HackScript = "hack.js";
+const HackScript = "hack-weaken-grow.js";
 const Options = [
     ["killscript", false], 
     ["delay", 3000], 
-    ["target", "silver-helix"], 
+    ["target", "joesguns"], 
     ['host', []],
     ['affectstock', false],
 ];
@@ -14,7 +14,6 @@ const Options = [
 **/
 export async function main(ns) {
     if (ns.args.length == 0) {
-        ns.tprint("Options:");
         ns.tprint(Options);
         return;
     }
@@ -26,7 +25,7 @@ export async function main(ns) {
     }
 
     for (let node of nodes) {
-        if (node.indexOf(ServerPrefix) < 0 || node === "home") continue;
+        if (node.indexOf(ServerPrefix) < 0) continue;
 
         if (param.killscript) {
             while (ns.scriptRunning(HackScript, node)) {
@@ -37,6 +36,7 @@ export async function main(ns) {
 
         let numThreads = Math.floor(ns.getServerMaxRam(node) / ns.getScriptRam(HackScript));
         if (numThreads > 0) {
+            await ns.scp(HackScript, "home", node);
             if (param.affectstock) {
                 ns.exec(HackScript, node, numThreads, '--target', param.target, '--thread', numThreads, '--affectstock');
             } else {

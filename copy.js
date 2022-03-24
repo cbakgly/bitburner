@@ -1,6 +1,9 @@
 import { getNodes } from "nodes.js";
 
-const Options = [["file", ["hack.js"]],["help", false]];
+const Options = [
+	["file", ["hack-weaken-grow.js"]],
+	["help", false]
+];
 
 /**
 * @param {NS} ns

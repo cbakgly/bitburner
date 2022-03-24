@@ -1,15 +1,20 @@
+const ServerPrefix = "pserv-";
+const HackScript = "runhack-v2.js";
+const Options = [
+    ["ram", 32], 
+    ["delay", 5000], 
+    ["target", "joesguns"],
+    ['help',false]
+];
+
 /**
 * @param {NS} ns
 **/
 export async function main(ns) {
-    const ServerPrefix = "pserv-";
-    const HackScript = "hack-weaken-grow.js";
-    const Options = [["ram", 2048], ["delay", 5000], ["target", "silver-helix"],['help',false]];
     
     const param = ns.flags(Options);
 
     if (param.help) {
-        ns.tprint("Options:");
         ns.tprint(Options);
         return;
     }
@@ -18,7 +23,6 @@ export async function main(ns) {
     const ram = Math.min(param.ram, ns.getPurchasedServerMaxRam()); 
     const delay = param.delay;
 
-    let numThreads = Math.floor(ram / ns.getScriptRam(HackScript));
     // Continuously try to purchase servers until we've reached the maximum
     // amount of servers
     for (let i = 0; i < ns.getPurchasedServerLimit();) {
@@ -36,9 +40,7 @@ export async function main(ns) {
                 break;
             }
 
-            await ns.scp(HackScript, hostname);
-
-            ns.exec(HackScript, hostname, numThreads, '--target', target, '--thread', numThreads);
+            ns.exec(HackScript, 'home', 1, '--target', target, '--host', hostname);
 
             ++i;
         }

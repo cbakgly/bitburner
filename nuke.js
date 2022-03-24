@@ -4,13 +4,8 @@ import { getNodes} from "nodes.js";
 * @param {NS} ns
 **/
 export function main(ns) {
-    let serverPrefix = "pserv-";
 
-    let hosts = getNodes(ns);
-
-    for( let target of hosts) {
-        if (target == "home") continue;
-        if (target.indexOf(serverPrefix) >= 0) continue;
+    for( let target of getNodes(ns)) {
         if (ns.hasRootAccess(target)) continue;
 
         let level = ns.getServerNumPortsRequired(target);

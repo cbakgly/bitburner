@@ -43,6 +43,7 @@ export function getAllTargetInfo(ns) {
     for (let info of nodes) {
         let result = {
             'hostname': info.hostname,
+            'mMem': ns.nFormat(info.maxRam, '0'),
             'mMax': ns.nFormat(info.moneyMax, '0.00a'),
             'mNow': ns.nFormat(info.moneyAvailable, '0.00a'),
             'growth': info.serverGrowth,
