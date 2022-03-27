@@ -7,64 +7,116 @@ export function main(ns) {
 
     const Options = [
         ['target', ''],
-        ['help', false]
+        ['all', false],
+        ['sort', 'hackeff']
     ];
     const param = ns.flags(Options);
 
-    if (param.help) {
-        ns.tprint(Options);
-        return;
-    }
+    ns.tprint(param);
 
-    if (param.target !== '') {
-        ns.tprint(ns.getServer(param.target));
-        return;
-    }
+    let level = ns.getHackingLevel();
+    let results = getAllTargetInfo(ns);
+    results.sort((a, b) => a[param.sort] - b[param.sort]);
 
-    for (let i of getAllTargetInfo(ns)) {
-        ns.tprint(i);
+    for (let i of results) {
+        // ns.tprint(i.hostname)
+        if ((param.target != '' && param.target != i.hostname) || (!param.all && (i.reqlvl > level)) ) continue;
+        ns.tprint(format(ns, i));
+        ns.tprint('');
     }
 }
 
 export function getAllTargetInfo(ns) {
-    let nodes = [];
-    for (let node of getNodes(ns)) {
-        let info = ns.getServer(node);
-
-        if (info.purchasedByPlayer) continue;
-
-        nodes.push(info);
-    }
-
-    nodes.sort((a, b) => a.moneyMax - b.moneyMax);
-
     let player = ns.getPlayer();
     let results = [];
-    for (let info of nodes) {
+    for (let node of getNodes(ns)) {
+        let info = ns.getServer(node);
+        if (info.purchasedByPlayer) continue;
+
         let result = {
             'hostname': info.hostname,
-            'mMem': ns.nFormat(info.maxRam, '0'),
-            'mMax': ns.nFormat(info.moneyMax, '0.00a'),
-            'mNow': ns.nFormat(info.moneyAvailable, '0.00a'),
-            'growth': info.serverGrowth,
-            'hard': ns.nFormat(info.hackDifficulty, '0.0a'),
+            'admin': info.hasAdminRights,
             'reqlvl': info.requiredHackingSkill,
-            'admin': info.hasAdminRights
+            'ram': info.maxRam,
+            'mRatio': (info.moneyAvailable / (info.moneyMax + 1)),
+            'mMax': info.moneyMax,
+            'mNow': info.moneyAvailable,
+            'growth': info.serverGrowth,
+            'hackeff': info.moneyMax / ns.getHackTime(info.hostname),
+            'groweff': info.moneyAvailable / ns.getGrowTime(info.hostname),
+            'hack1thread': ns.hackAnalyze(node),
+            'hackchance': ns.hackAnalyzeChance(node),
+            'hsecur+': ns.hackAnalyzeSecurity(node),
+            'gsecur+': ns.growthAnalyzeSecurity(10),
+            'secur': info.hackDifficulty,
+            'weaken1-1': ns.weakenAnalyze(1, 1), // 1 thread, 1 core, weaken effect
+            'weaken10-1': ns.weakenAnalyze(10, 1), // 1 thread, 1 core, weaken effect
+            'weaken1-2': ns.weakenAnalyze(1, 2), // 1 thread, 1 core, weaken effect
+            'htime': ns.getHackTime(node),
+            'gtime': ns.getGrowTime(node),
+            'wtime': ns.getWeakenTime(node),
+            'halfMoneyThread': ns.hackAnalyzeThreads(node, info.moneyMax / 2) * ns.getHackTime(node) / ns.getGrowTime(node),
+            'growDoubleThread': ns.growthAnalyze(node, 2, 1), // times to double
+            'grow1HalfThread': ns.growthAnalyze(node, 1.5, 1), // times to double
         };
 
         if (ns.fileExists("formulas.exe", "home")) {
-            result["grow%"] = ns.nFormat(ns.formulas.hacking.growPercent(info, 1, player, 1), '0.00a');
-            result['growTime'] = ns.tFormat(ns.formulas.hacking.growTime(info, player));
-            result['hackChance'] = ns.nFormat(ns.formulas.hacking.hackChance(info, player), '0.00a');
-            result['hackExp'] = ns.nFormat(ns.formulas.hacking.hackExp(info, player), '0.00a');
-            result['hack%'] = ns.nFormat(ns.formulas.hacking.hackPercent(info, player), '0.00a');
-            result['hackTime'] = ns.tFormat(ns.formulas.hacking.hackTime(info, player));
-            result['weakTime'] = ns.tFormat(ns.formulas.hacking.weakenTime(info, player));
+            result['hackChance'] = ns.formulas.hacking.hackChance(info, player);
+            result['hackExp'] = ns.formulas.hacking.hackExp(info, player);
+            result['hack%'] = ns.formulas.hacking.hackPercent(info, player);
+            result['hackTime'] = ns.formulas.hacking.hackTime(info, player);
+            result["grow%"] = ns.formulas.hacking.growPercent(info, 1, player, 1);
+            result['growTime'] = ns.formulas.hacking.growTime(info, player);
+            result['weakTime'] = ns.formulas.hacking.weakenTime(info, player);
         }
 
         results.push(result);
     }
+    // results.sort((a, b) => a.groweff - b.groweff);
+    // results.sort((a, b) => a.hackeff - b.hackeff);
     return results;
+}
+
+function format(ns, info) {
+    let result = {
+        'host': info.hostname,
+        'admin': info.admin,
+        'reqlvl': info.requiredHackingSkill,
+        'ram': ns.nFormat(info.ram, '0'),
+        'mRatio': ns.nFormat(info.mRatio, '0.000%'),
+        'mMax': ns.nFormat(info.mMax, '0.00a'),
+        'mNow': ns.nFormat(info.mNow, '0.00a'),
+        'growth': info.growth,
+        'hackeff': ns.nFormat(info.hackeff, '0.0000a'),
+        'groweff': ns.nFormat(info.groweff, '0.0000a'),
+        'secur': ns.nFormat(info.secur, '0.0a'),
+        'hack1thread': ns.nFormat(info.hack1thread, '0.000a'),
+        'hackchance': ns.nFormat(info.hackchance, '0.000a'),
+        'hsecur+': ns.nFormat(info['hsecur+'], '0.000a'),
+        'gsecur+': info['gsecur+'],
+        'weaken1-1': ns.nFormat(info['weaken1-1'], '0.000a'), // 1 thread, 1 core, weaken effect
+        'weaken10-1': ns.nFormat(info['weaken10-1'], '0.000a'), // 1 thread, 1 core, weaken effect
+        'weaken1-2': ns.nFormat(info['weaken1-2'], '0.000a'), // 1 thread, 1 core, weaken effect
+        'htime': ns.tFormat(info.htime),
+        'gtime': ns.tFormat(info.gtime),
+        'wtime': ns.tFormat(info.wtime),
+        'halfMoneyThread': ns.nFormat(info['halfMoneyThread'], '0.000a'),
+        'growDoubleThread': ns.nFormat(info.growDoubleThread, '0'), // times to double
+        'grow1HalfThread': ns.nFormat(info.grow1HalfThread, '0'), // times to double
+
+    }
+
+    if (ns.fileExists("formulas.exe", "home")) {
+        result['hackChance'] = ns.nFormat(info.hackChance, '0.00a');
+        result['hackExp'] = ns.nFormat(info.hackExp, '0.00a');
+        result['hack%'] = ns.nFormat(info.hackPercent, '0.00a');
+        result['hackTime'] = ns.tFormat(info.hackTime);
+        result["grow%"] = ns.nFormat(info['grow%'], '0.00a');
+        result['growTime'] = ns.tFormat(info.growTime);
+        result['weakTime'] = ns.tFormat(info.weakenTime);
+    }
+
+    return result;
 }
 
 export function getTargets(ns) {
@@ -72,14 +124,14 @@ export function getTargets(ns) {
     let level = ns.getHackingLevel();
     for (let info of getAllTargetInfo(ns)) {
 
-        if (!info.admin 
-            || info.mMax == 0 
-            || info.reqlvl > level) continue;
+        if (!info.admin
+            || info.reqlvl > level
+            || info.hack1thread < 0.001) continue;
 
         result.push(info);
     }
+    result.sort((a, b) => a.hackeff - b.hackeff);
 
-    result.sort((a, b) => a.hard - b.hard);
     return result;
 }
 

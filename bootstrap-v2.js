@@ -7,10 +7,10 @@
 export async function main(ns) {
     
     ns.run("nuke.js");
-
-    ns.run("buy-server-v2.js", 1, '--target', 'foodnstuff');
-    ns.run("runhack-v2.js", 1, '--target', 'foodnstuff');
-    ns.run("runhack-v2.js", 1, '--target', 'foodnstuff', '--host', 'home');
+    ns.run("buy-hacknode.js", 1, '--skipcore');
+    ns.run("buy-server-v2.js", 1, '--target', 'harakiri-sushi', '--ram', 2048);
+    ns.run("runhack-v2.js", 1, '--target', 'harakiri-sushi');
+    ns.run("runhack-v2.js", 1, '--target', 'harakiri-sushi', '--host', 'home');
 
     ns.toast("Done bootstrap");
 }

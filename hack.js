@@ -18,8 +18,13 @@ export async function main(ns) {
         return;
     }
 
-    while(param.loop) {
-        await ns.hack(param.target, {threads: param.thread, stock: param.affectstock});
+    let moneyThresh = ns.getServerMaxMoney(param.target) * 0.25;
+    while (param.loop) {
+        if (ns.getServerMoneyAvailable(param.target) < moneyThresh) {
+            await ns.sleep(param.delay);
+            continue;
+        }
+        await ns.hack(param.target, { threads: param.thread, stock: param.affectstock });
     }
-    
+
 }   

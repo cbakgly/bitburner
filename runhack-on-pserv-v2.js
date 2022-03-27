@@ -1,16 +1,15 @@
 import { getNodes } from "nodes.js";
+import { getTargets } from 'analyze.js';
 
 const HackScript = "hack.js";
 const GrowScript = 'grow.js';
 const WeakenScript = 'weaken.js';
 const AllInOne = 'hack-weaken-grow.js';
+const ServerPrefix = "pserv-";
 
 const Options = [
     ["killscript", false],
     ["delay", 3000],
-    ["target", ""],
-    ['host', []],
-    ['loop', true],
     ['reserveram', 12] // reserve 12g 
 ];
 
@@ -22,37 +21,31 @@ export async function main(ns) {
     }
     const param = ns.flags(Options);
 
-    if (ns.getServerRequiredHackingLevel(param.target) > ns.getHackingLevel()) {
-        ns.tprint("Doesn't meet the required hacking level.")
-    }
+    let targets = getTargets(ns);
 
-    let nodes = param.host;
-    if (nodes.length == 0) {
-        nodes = getNodes(ns);
-    }
-
-    for (let node of nodes) {
-        if (!ns.hasRootAccess(node)) continue;
+    for (let node of getNodes(ns)) {
+        if (node.indexOf(ServerPrefix) < 0) continue;
         if (param.killscript) {
             ns.scriptKill(HackScript, node);
             ns.scriptKill(GrowScript, node);
             ns.scriptKill(WeakenScript, node);
         }
 
+        let target = targets.pop().hostname;
 
         let thread = calcThreadForServer(ns, node, param.reserveram);
         if (thread != null) {
             if (node != 'home') {
                 await ns.scp([HackScript, GrowScript, WeakenScript], "home", node);
-            }            
-            ns.exec(HackScript, node, thread.hack, '--target', param.target, '--thread', thread.hack, '--affectstock', '--loop');
-            ns.exec(GrowScript, node, thread.grow, '--target', param.target, '--thread', thread.grow, '--affectstock', '--loop');
-            ns.exec(WeakenScript, node, thread.weaken, '--target', param.target, '--thread', thread.weaken, '--affectstock', '--loop');
+            }
+            ns.exec(HackScript, node, thread.hack, '--target', target, '--thread', thread.hack, '--affectstock', '--loop');
+            ns.exec(GrowScript, node, thread.grow, '--target', target, '--thread', thread.grow, '--affectstock', '--loop');
+            ns.exec(WeakenScript, node, thread.weaken, '--target', target, '--thread', thread.weaken, '--affectstock', '--loop');
         } else {
             if (node != 'home') {
                 await ns.scp(AllInOne, "home", node);
             }
-            ns.exec(AllInOne, node, 1, '--target', param.target);
+            ns.exec(AllInOne, node, 1, '--target', target);
         }
     }
 
@@ -64,7 +57,7 @@ function calcThreadForServer(ns, node, reserveram) {
     let mem = (ns.getServerMaxRam(node) - ns.getServerUsedRam(node));
 
     if (node == 'home') {
-        mem -= reserveram; 
+        mem -= reserveram;
     }
 
     let thread = {

@@ -1,18 +1,18 @@
-/**
-* @param {NS} ns
-**/
+/** * @param {NS} ns **/
 export async function main(ns) {
 
-    const Options = [['maxnodes', 20],['help', false],['delay', 3000]];
+    const Options = [
+        ['max', 20],
+        ['help', false],
+        ['delay', 3000],
+        ['skipmem', false],
+        ['skipcore', false]
+    ];
     const param = ns.flags(Options);
 
-    if (param.help) {
-        ns.tprint("Options:");
-        ns.tprint(Options);
-        return;
-    }
+    ns.tprint(Options);
 
-    const maxNumNodes = param.maxnodes;
+    const maxNumNodes = param.max;
     const delay = param.delay;
 
     // Continuously try to purchase servers until we've reached the maximum
@@ -71,7 +71,7 @@ export async function main(ns) {
                     continue;
                 }
                 let ramCost = ns.hacknet.getRamUpgradeCost(0, 1);
-                if (ramCost > 0 && ramCost < ns.getServerMoneyAvailable("home")) {
+                if (!param.skipmem && ramCost > 0 && ramCost < ns.getServerMoneyAvailable("home")) {
                     ns.hacknet.upgradeRam(0, 1);
                     ns.print("Upgrade node 0 ram");
                     needUpgrade = true;
@@ -79,7 +79,7 @@ export async function main(ns) {
                     continue;
                 }
                 let coreCost = ns.hacknet.getCoreUpgradeCost(0, 1);
-                if (coreCost > 0 && coreCost < ns.getServerMoneyAvailable("home")) {
+                if (!param.skipcore && coreCost > 0 && coreCost < ns.getServerMoneyAvailable("home")) {
                     ns.hacknet.upgradeCore(0, 1);
                     ns.print("Upgrade node 0 core");
                     needUpgrade = true;
