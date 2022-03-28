@@ -18,7 +18,7 @@ export async function main(ns) {
         return;
     }
 
-    let moneyThresh = ns.getServerMaxMoney(param.target) * 0.25;
+    let moneyThresh = ns.getServerMaxMoney(param.target) * 0.5;
     while (param.loop) {
         if (ns.getServerMoneyAvailable(param.target) < moneyThresh) {
             await ns.sleep(param.delay);

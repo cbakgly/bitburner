@@ -1,7 +1,7 @@
 import { getNodes } from "nodes.js";
 
 const Options = [
-	["file", ["hack-weaken-grow.js"]],
+	["file", ["hack-weaken-grow.js", 'hack.js', 'grow.js', 'weaken.js']],
 	["help", false]
 ];
 

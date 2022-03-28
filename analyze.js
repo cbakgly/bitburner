@@ -42,8 +42,8 @@ export function getAllTargetInfo(ns) {
             'mMax': info.moneyMax,
             'mNow': info.moneyAvailable,
             'growth': info.serverGrowth,
-            'hackeff': info.moneyMax / ns.getHackTime(info.hostname),
-            'groweff': info.moneyAvailable / ns.getGrowTime(info.hostname),
+            'hackeff': info.moneyMax / ns.getHackTime(node),
+            'groweff': info.moneyAvailable / ns.getGrowTime(node),
             'hack1thread': ns.hackAnalyze(node),
             'hackchance': ns.hackAnalyzeChance(node),
             'hsecur+': ns.hackAnalyzeSecurity(node),
@@ -55,9 +55,10 @@ export function getAllTargetInfo(ns) {
             'htime': ns.getHackTime(node),
             'gtime': ns.getGrowTime(node),
             'wtime': ns.getWeakenTime(node),
-            'halfMoneyThread': ns.hackAnalyzeThreads(node, info.moneyMax / 2) * ns.getHackTime(node) / ns.getGrowTime(node),
+            'hackAvailMoneyThread': ns.hackAnalyzeThreads(info.hostname, info.moneyAvailable),
             'growDoubleThread': ns.growthAnalyze(node, 2, 1), // times to double
             'grow1HalfThread': ns.growthAnalyze(node, 1.5, 1), // times to double
+            'grow25Thread': ns.growthAnalyze(node, 25, 1), // times to double
         };
 
         if (ns.fileExists("formulas.exe", "home")) {
@@ -100,10 +101,10 @@ function format(ns, info) {
         'htime': ns.tFormat(info.htime),
         'gtime': ns.tFormat(info.gtime),
         'wtime': ns.tFormat(info.wtime),
-        'halfMoneyThread': ns.nFormat(info['halfMoneyThread'], '0.000a'),
+        'hackAvailMoneyThread': ns.nFormat(info.hackAvailMoneyThread, '0.000a'),
         'growDoubleThread': ns.nFormat(info.growDoubleThread, '0'), // times to double
         'grow1HalfThread': ns.nFormat(info.grow1HalfThread, '0'), // times to double
-
+        'grow25Thread': ns.nFormat(info.grow25Thread, '0')
     }
 
     if (ns.fileExists("formulas.exe", "home")) {
@@ -125,6 +126,7 @@ export function getTargets(ns) {
     for (let info of getAllTargetInfo(ns)) {
 
         if (!info.admin
+            || info.mMax < 1000
             || info.reqlvl > level
             || info.hack1thread < 0.001) continue;
 
